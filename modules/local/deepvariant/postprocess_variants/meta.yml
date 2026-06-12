@@ -1,0 +1,51 @@
+name: postprocess_variants
+description: |
+  Generation of GVCF from variant calling run by DeepVariant or DeepTrio.
+  This runs on one sample, but can loop through multiple sets of calls from
+  different regions of the genome. It is run after make_examples and call_variants.
+tools:
+  - deepvariant:
+      description: |
+        DeepVariant is a deep learning-based variant caller that takes aligned
+        reads (in BAM or CRAM format), produces pileup image tensors from them,
+        classifies each tensor using a convolutional neural network, and finally
+        reports the results in a standard VCF or gVCF file.
+      homepage: https://github.com/google/deepvariant
+      doi: 10.1038/nbt.4235
+      license: ["BSD 3-Clause"]
+  - bcftools_index:
+      description: Index VCF files.
+      homepage: http://samtools.github.io/bcftools/bcftools.html
+      documentation: http://www.htslib.org/doc/bcftools.html
+      doi: 10.1093/bioinformatics/btp352
+      licence: ["MIT"]
+input:
+  - meta:
+      type: map
+      description: Metadata map with sample ID.
+  - cv_record:
+      type: path
+      description: List of call_variants tfrecord files.
+  - gvcf_record:
+      type: path
+      description: List of gvcf tfrecord files.
+  - fasta_ensembl:
+      type: path
+      description: FASTA of reference genome.
+  - fai_ensembl:
+      type: path
+      description: FAIDX index of reference genome.
+  - par_bed:
+      type: path
+      description: BED file listing regions of sex chromosomes to be treated as autosomal.
+output:
+  - out_gvcf:
+      type: path
+      description: GVCF for a single sample.
+      pattern: "*.vcf.gz"
+  - out_index:
+      type: path
+      description: Tabix index for the GVCF.
+      pattern: "*.vcf.gz.tbi"
+authors:
+  - "@lvclark"

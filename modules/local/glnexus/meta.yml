@@ -1,0 +1,25 @@
+name: glnexus
+description: Joint variant calling across GVCFs.
+tools:
+  - GLnexus:
+    description: |
+      From DNAnexus R&D: scalable gVCF merging and joint variant calling for
+      population sequencing projects. (GL, genotype likelihood)
+    homepage: https://github.com/dnanexus-rnd/GLnexus
+    doi: 10.1101/343970
+    license: ["Apache-2.0"]
+input:
+  - gvcfs:
+      type: path
+      description: List of gVCFs to process.  Should all have the extension .vcf.gz.
+  - cohort_name:
+      type: string
+      description: Name of cohort to be used for naming output BCF.
+output:
+  - outbcf:
+      type: path
+      description: Joint called BCF.
+      pattern: ".glnexus.{bcf}"
+authors:
+  - "@lvclark"
+  - "@brentp"

@@ -1,0 +1,57 @@
+name: make_examples_single
+description: |
+  First step of variant calling on individual samples.
+  Ensembl, 1000 Genomes, and UCSC chromosome names are supported.
+Tools:
+  - deepvariant:
+      description: |
+        DeepVariant is a deep learning-based variant caller that takes aligned
+        reads (in BAM or CRAM format), produces pileup image tensors from them,
+        classifies each tensor using a convolutional neural network, and finally
+        reports the results in a standard VCF or gVCF file.
+      homepage: https://github.com/google/deepvariant
+      doi: 10.1101/2021.04.05.438434
+      license: ["BSD 3-Clause"]
+input:
+  - meta:
+      type: map
+      description: |
+        metadata map containing proband_sex ("Male" or "Female"), proband_id,
+        father_id, and mother_id.
+  - bams:
+      type: path
+      description: |
+        A list of BAMs, with the child first, the father (if available)
+        second, and the mother (if available) last.
+  - bais:
+      type: path
+      description: List of index files for each BAM provided.
+  - fasta_bams:
+      type: path
+      description: FASTA file of reference genome.
+  - fai_bams:
+      type: path
+      description: FAI index of reference genome.
+  - par_bed:
+      type: path
+      description: BED file listing regions of sex chromosomes to be treated as autosomal.
+  - x_only:
+      type: boolean
+      description: True if only the X chromosome should be genotyped.
+  - y_only:
+      type: boolean
+      description: True if only the Y chromosome should be genotyped.
+- output:
+  - proband_tfrecord:
+      type: tuple
+      description: |
+        Output files and values pertaining to the proband.
+        List of make_examples tfrecord files and list of gvcf
+        tfrecord files. Includes metadata map, copies from the input metadata
+        and with "id" set to the proband_id.
+  - example_info:
+      type: tuple
+      description: |
+        JSON files containing model information. Includes metadata map with proband_id.
+authors:
+  - "@lvclark"

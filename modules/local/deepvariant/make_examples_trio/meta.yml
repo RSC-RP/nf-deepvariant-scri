@@ -1,0 +1,66 @@
+name: make_examples_trio
+description: |
+  First step of variant calling on pairs or trios of samples.
+  Ensembl, 1000 Genomes, and UCSC chromosome names are supported.
+  Note that sex chromosomes are only genotyped where there is a parent-child
+  connection, so it may be necessary to also run DeepVariiant, e.g. for the
+  X chromosome in father-son duos. There has been some indication that DeepTrio
+  will be updated in the future to better handle sex chromosomes.
+Tools:
+  - deeptrio:
+      description: |
+        DeepTrio is a deep learning-based trio variant caller built on top of
+        DeepVariant. DeepTrio extends DeepVariant's functionality, allowing it
+        to utilize the power of neural networks to predict genomic variants in
+        trios or duos.
+      homepage: https://github.com/google/deepvariant/blob/r1.8/docs/deeptrio-details.md
+      doi: 10.1101/2021.04.05.438434
+      license: ["BSD 3-Clause"]
+input:
+  - meta:
+      type: map
+      description: |
+        metadata map containing proband_sex ("Male" or "Female"), proband_id,
+        father_id, and mother_id.
+  - bams:
+      type: path
+      description: |
+        A list of BAMs, with the child first, the father (if available)
+        second, and the mother (if available) last.
+  - bais:
+      type: path
+      description: List of index files for each BAM provided.
+  - fasta_bams:
+      type: path
+      description: FASTA file of reference genome.
+  - fai_bams:
+      type: path
+      description: FAI index of reference genome.
+- output:
+  - proband_tfrecord:
+      type: tuple
+      description: |
+        Output files and values pertaining to the proband.
+        List of make_examples tfrecord files and list of gvcf
+        tfrecord files. Includes metadata map with sample ID
+        and "role" equal to "child".
+  - father_tfrecord:
+      type: tuple
+      description: |
+        Output files and values pertaining to the father.
+        List of make_examples tfrecord files and list of gvcf
+        tfrecord files. Includes metadata map with sample ID
+        and "role" equal to "parent".
+  - mother_tfrecord:
+      type: tuple
+      description: |
+        Output files and values pertaining to the mother.
+        List of make_examples tfrecord files and list of gvcf
+        tfrecord files. Includes metadata map with sample ID
+        and "role" equal to "parent".
+  - example_info:
+      type: tuple
+      description: |
+        JSON files containing model information. Includes metadata map with proband_id.
+authors:
+  - "@lvclark"
