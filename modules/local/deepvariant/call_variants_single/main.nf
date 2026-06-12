@@ -15,8 +15,8 @@ process CALL_VARIANTS_SINGLE {
     sample_id = meta.id
 
     // Build argument for --examples and --outfile (list of call sets to loop through)
-    tfr_first = me_tfrecord.findAll{ it.name ==~ /.*tfrecord-00000-of.*/ }
-    tfr_prefix = tfr_first.collect{ it.simpleName - "make_examples" }.sort()
+    tfr_first = me_tfrecord.findAll{ it -> it.name ==~ /.*tfrecord-00000-of.*/ }
+    tfr_prefix = tfr_first.collect{ it -> it.simpleName - "make_examples" }.sort()
     tfr_string = tfr_prefix.join(' ')
 
     """

@@ -12,7 +12,7 @@ workflow mecv_single {
         par_bed
     main:
         bam_ch
-            .map{ [it[0] + [id: it[0].proband_id], it[1], it[2]] }
+            .map{ meta, bam, index -> [meta + [id: meta.proband_id], bam, index] }
             .set{ bam_ch }
         deepvariant(bam_ch, fasta, fai, par_bed, false, false)
         deepvariant.out
@@ -33,15 +33,15 @@ workflow mecv_maletrio {
         deeptrio(bam_ch, fasta, fai)
         // just the father
         bam_ch
-            .map{ [it[0] + [id: it[0].father_id], it[1][1], it[2][1]] }
+            .map{ meta, bams, indices -> [meta + [id: meta.father_id], bams[1], indices[1]] }
             .set{ bam_dad }
         deepvariant(bam_dad, fasta, fai, par_bed, true, false) // last two booleans specify X chrom
         deepvariant.out
-           .map{ [[id: it[0].id, proband_id: it[0].proband_id, role: "parent", sex: it[0].sex], it[1], it[2]] }
+           .map{ meta, cv, gvcf -> [[id: meta.id, proband_id: meta.proband_id, role: "parent", sex: meta.sex], cv, gvcf] }
            .set { cv_dad }
         deeptrio.out
            .join(cv_dad, remainder: true)
-           .map{
+           .map{ it ->
              if(it.size == 5){
                 [it[0], it[1] + it[3], it[2] + it[4]] // combines output from deeptrio and deepvariant
              }
@@ -66,15 +66,15 @@ workflow mecv_femaletrio_dadduo {
         deeptrio(bam_ch, fasta, fai)
         // just the father
         bam_ch
-            .map{ [it[0] + [id: it[0].father_id], it[1][1], it[2][1]] }
+            .map{ meta, bams, indices -> [meta + [id: meta.father_id], bams[1], indices[1]] }
             .set{ bam_dad }
         deepvariant(bam_dad, fasta, fai, par_bed, false, true) // last two booleans specify Y chrom
         deepvariant.out
-           .map{ [[id: it[0].id, proband_id: it[0].proband_id, role: "parent", sex: it[0].sex], it[1], it[2]] }
+           .map{ meta, cv, gvcf -> [[id: meta.id, proband_id: meta.proband_id, role: "parent", sex: meta.sex], cv, gvcf] }
            .set { cv_dad }
         deeptrio.out
            .join(cv_dad, remainder: true)
-           .map{
+           .map{ it ->
              if(it.size == 5){
                 [it[0], it[1] + it[3], it[2] + it[4]] // combines output from deeptrio and deepvariant
              }
@@ -99,15 +99,15 @@ workflow mecv_malemomduo {
         deeptrio(bam_ch, fasta, fai)
         // just the proband
         bam_ch
-            .map{ [it[0] + [id: it[0].proband_id], it[1][0], it[2][0]] }
+            .map{ meta, bams, indices -> [meta + [id: meta.proband_id], bams[0], indices[0]] }
             .set{ bam_pro }
         deepvariant(bam_pro, fasta, fai, par_bed, false, true) // last two booleans specify Y chrom
         deepvariant.out
-           .map{ [[id: it[0].id, proband_id: it[0].proband_id, role: "child", sex: it[0].sex], it[1], it[2]] }
+           .map{ meta, cv, gvcf -> [[id: meta.id, proband_id: meta.proband_id, role: "child", sex: meta.sex], cv, gvcf] }
            .set { cv_pro }
         deeptrio.out
            .join(cv_pro, remainder: true)
-           .map{
+           .map{ it ->
              if(it.size == 5){
                 [it[0], it[1] + it[3], it[2] + it[4]] // combines output from deeptrio and deepvariant
              }
@@ -147,23 +147,23 @@ workflow mecv_maledadduo {
         deeptrio(bam_ch, fasta, fai)
         // just the father
         bam_ch
-            .map{ [it[0] + [id: it[0].father_id], it[1][1], it[2][1]] }
+            .map{ meta, bams, indices -> [meta + [id: meta.father_id], bams[1], indices[1]] }
             .set{ bam_dad }
         deepvariant(bam_dad, fasta, fai, par_bed, true, false) // last two booleans specify X chrom
         deepvariant.out
-           .map{ [[id: it[0].id, proband_id: it[0].proband_id, role: "parent", sex: it[0].sex], it[1], it[2]] }
+           .map{ meta, cv, gvcf -> [[id: meta.id, proband_id: meta.proband_id, role: "parent", sex: meta.sex], cv, gvcf] }
            .set { cv_dad }
         // just the proband
         bam_ch
-            .map{ [it[0] + [id: it[0].proband_id], it[1][0], it[2][0]] }
+            .map{ meta, bams, indices -> [meta + [id: meta.proband_id], bams[0], indices[0]] }
             .set{ bam_pro }
         deepvariant1(bam_pro, fasta, fai, par_bed, true, false) // last two booleans specify X chrom
         deepvariant1.out
-           .map{ [[id: it[0].id, proband_id: it[0].proband_id, role: "child", sex: it[0].sex], it[1], it[2]] }
+           .map{ meta, cv, gvcf -> [[id: meta.id, proband_id: meta.proband_id, role: "child", sex: meta.sex], cv, gvcf] }
            .set { cv_pro }
         deeptrio.out
            .join(cv_dad.concat(cv_pro), remainder: true)
-           .map{
+           .map{ it ->
              if(it.size == 5){
                 [it[0], it[1] + it[3], it[2] + it[4]] // combines output from deeptrio and deepvariant
              }

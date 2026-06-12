@@ -15,10 +15,9 @@ process POSTPROCESS_VARIANTS {
     script:
     sample_id = meta.id
     out_gvcf = "${sample_id}.gvcf.gz"
-    out_vcf = "${sample_id}.vcf.gz"
 
     // Build argument for --nonvariant_site_tfrecord_path and --infile
-    tfr_prefix = gvcf_tfrecord.collect{ it.simpleName.replaceFirst(~/^gvcf/, "") }.unique( false ).sort() // 1_parent1
+    tfr_prefix = gvcf_tfrecord.collect{ it -> it.simpleName.replaceFirst(~/^gvcf/, "") }.unique( false ).sort() // 1_parent1
     tfr_string = tfr_prefix.join(' ')
     cv_shards = cv_tfrecord[0].simpleName.replaceFirst(~/.*\-of\-/, "").toInteger()
     gvcf_shards = gvcf_tfrecord[0].name.replaceFirst(".gz", "").replaceFirst(~/.*\-of\-/, "").toInteger()

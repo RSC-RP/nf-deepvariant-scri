@@ -25,8 +25,8 @@ process MAKE_EXAMPLES_TRIO {
         assert is_male && meta.proband_id.startsWith("HG00") && bams[0].size() < 50000000
     }
     def proband_id = meta.proband_id
-    def father_id = meta.father_id
-    def mother_id = meta.mother_id
+    father_id = meta.father_id
+    mother_id = meta.mother_id
     meta2 = [id: proband_id, proband_id: proband_id, role: "child", sex: meta.proband_sex]
     meta3 = [proband_id: proband_id]
     meta4 = [id: father_id, proband_id: proband_id, role: "parent", sex: "Male"]

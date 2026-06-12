@@ -34,23 +34,23 @@ workflow deeptrio {
     main:
         MAKE_EXAMPLES_TRIO(bam_ch, fasta, fai)
         MAKE_EXAMPLES_TRIO.out.proband_tfrecord
-            .map{ [[proband_id: it[0].proband_id], it[0], it[1], it[2] ] }
+            .map{ meta, me, gvcf -> [[proband_id: meta.proband_id], meta, me, gvcf] }
             .join(MAKE_EXAMPLES_TRIO.out.example_info)
-            .map{ [it[1], it[2], it[3], it[4]] }
+            .map{ _proband, meta, me, gvcf, ei -> [meta, me, gvcf, ei] }
             .set{ all_proband_tfrecords }
         MAKE_EXAMPLES_TRIO.out.father_tfrecord
-            .map{ [[proband_id: it[0].proband_id], it[0], it[1], it[2] ] }
+            .map{ meta, me, gvcf -> [[proband_id: meta.proband_id], meta, me, gvcf] }
             .join(MAKE_EXAMPLES_TRIO.out.example_info)
-            .map{ [it[1], it[2], it[3], it[4]] }
+            .map{ _proband, meta, me, gvcf, ei -> [meta, me, gvcf, ei] }
             .set{ all_father_tfrecords }
         MAKE_EXAMPLES_TRIO.out.mother_tfrecord
-            .map{ [[proband_id: it[0].proband_id], it[0], it[1], it[2] ] }
+            .map{ meta, me, gvcf -> [[proband_id: meta.proband_id], meta, me, gvcf] }
             .join(MAKE_EXAMPLES_TRIO.out.example_info)
-            .map{ [it[1], it[2], it[3], it[4]] }
+            .map{ _proband, meta, me, gvcf, ei -> [meta, me, gvcf, ei] }
             .set{ all_mother_tfrecords }
         all_proband_tfrecords
             .concat(all_father_tfrecords, all_mother_tfrecords)
-            .filter{ it[0].id != "" }
+            .filter{ meta, _me, _gvcf, _ei -> meta.id != "" }
             .set{ all_me_tfrecords }
         CALL_VARIANTS_TRIO(all_me_tfrecords)
         CALL_VARIANTS_TRIO.out

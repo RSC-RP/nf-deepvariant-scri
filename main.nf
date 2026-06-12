@@ -1,24 +1,24 @@
-include { mecv_single } from "../subworkflows/family_variant_calling"
-include { mecv_maletrio } from "../subworkflows/family_variant_calling"
-include { mecv_femaletrio_dadduo } from "../subworkflows/family_variant_calling"
-include { mecv_malemomduo } from "../subworkflows/family_variant_calling"
-include { mecv_femalemomduo } from "../subworkflows/family_variant_calling"
-include { mecv_maledadduo } from "../subworkflows/family_variant_calling"
-include { POSTPROCESS_VARIANTS } from '../modules/local/deepvariant/postprocess_variants/main'
-include { GLNEXUS } from '../modules/local/glnexus/main'
-include { BWA_MEM } from '../modules/nf-core/bwa/mem/main'
-include { SAMTOOLS_INDEX } from '../modules/nf-core/samtools/index/main'
-include { SAMTOOLS_FAIDX } from '../modules/nf-core/samtools/faidx/main'
+include { mecv_single } from "./subworkflows/family_variant_calling"
+include { mecv_maletrio } from "./subworkflows/family_variant_calling"
+include { mecv_femaletrio_dadduo } from "./subworkflows/family_variant_calling"
+include { mecv_malemomduo } from "./subworkflows/family_variant_calling"
+include { mecv_femalemomduo } from "./subworkflows/family_variant_calling"
+include { mecv_maledadduo } from "./subworkflows/family_variant_calling"
+include { POSTPROCESS_VARIANTS } from './modules/local/deepvariant/postprocess_variants/main'
+include { GLNEXUS } from './modules/local/glnexus/main'
+include { BWA_MEM } from './modules/nf-core/bwa/mem/main'
+include { SAMTOOLS_INDEX } from './modules/nf-core/samtools/index/main'
+include { SAMTOOLS_FAIDX } from './modules/nf-core/samtools/faidx/main'
 
 // workflow for variant calling on trios, duos, or singletons
 workflow CALL_TRIOS {
     // Reference sequence for alignment and genotype calling, which may be different from Ensembl.
-    Channel.fromPath(file(params.fasta_bams, checkIfExists: true))
+    channel.fromPath(file(params.fasta_bams, checkIfExists: true))
         .collect() // allows the reference to be used with multiple input VCFs
         .set{ fasta_bams }
     fai_file2 = file("${params.fasta_bams}.fai")
     if( fai_file2.exists() ){
-        Channel.fromPath(fai_file2)
+        channel.fromPath(fai_file2)
             .collect()
             .set{ fai_bams }
     }
