@@ -1,0 +1,7 @@
+name: nextflow_deepvariant
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - nextflow=26.04.3
+  - graphviz
