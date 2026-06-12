@@ -20,9 +20,8 @@ workflow deepvariant {
             .set{ single_tfrecords }
         CALL_VARIANTS_SINGLE(single_tfrecords)
         CALL_VARIANTS_SINGLE.out
-            .set{ cv_out }
     emit:
-        cv_out
+        CALL_VARIANTS_SINGLE.out
 }
 
 // Any family
@@ -54,7 +53,6 @@ workflow deeptrio {
             .set{ all_me_tfrecords }
         CALL_VARIANTS_TRIO(all_me_tfrecords)
         CALL_VARIANTS_TRIO.out
-            .set{ cv_out }
     emit:
-        cv_out
+        CALL_VARIANTS_TRIO.out
 }

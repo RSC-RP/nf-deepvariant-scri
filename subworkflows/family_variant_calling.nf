@@ -15,10 +15,8 @@ workflow mecv_single {
             .map{ meta, bam, index -> [meta + [id: meta.proband_id], bam, index] }
             .set{ bam_ch }
         deepvariant(bam_ch, fasta, fai, par_bed, false, false)
-        deepvariant.out
-            .set{ cv_out }
     emit:
-        cv_out
+        deepvariant.out
 }
 
 // Male trio; DeepTrio misses father's X chromosome
@@ -39,6 +37,7 @@ workflow mecv_maletrio {
         deepvariant.out
            .map{ meta, cv, gvcf -> [[id: meta.id, proband_id: meta.proband_id, role: "parent", sex: meta.sex], cv, gvcf] }
            .set { cv_dad }
+    emit:
         deeptrio.out
            .join(cv_dad, remainder: true)
            .map{ it ->
@@ -49,9 +48,6 @@ workflow mecv_maletrio {
                 [it[0], it[1], it[2]]
              }
            }
-           .set{ cv_out }
-    emit:
-        cv_out
 }
 
 // Female trio, or female plus father; DeepTrio misses Y chromosome.
@@ -72,6 +68,7 @@ workflow mecv_femaletrio_dadduo {
         deepvariant.out
            .map{ meta, cv, gvcf -> [[id: meta.id, proband_id: meta.proband_id, role: "parent", sex: meta.sex], cv, gvcf] }
            .set { cv_dad }
+    emit:
         deeptrio.out
            .join(cv_dad, remainder: true)
            .map{ it ->
@@ -82,9 +79,6 @@ workflow mecv_femaletrio_dadduo {
                 [it[0], it[1], it[2]]
              }
            }
-           .set{ cv_out }
-    emit:
-        cv_out
 }
 
 // Duo of male proband and mother; DeepTrio misses proband Y chromosome.
@@ -105,6 +99,7 @@ workflow mecv_malemomduo {
         deepvariant.out
            .map{ meta, cv, gvcf -> [[id: meta.id, proband_id: meta.proband_id, role: "child", sex: meta.sex], cv, gvcf] }
            .set { cv_pro }
+    emit:
         deeptrio.out
            .join(cv_pro, remainder: true)
            .map{ it ->
@@ -115,9 +110,6 @@ workflow mecv_malemomduo {
                 [it[0], it[1], it[2]]
              }
            }
-           .set{ cv_out }
-    emit:
-        cv_out
 }
 
 // Duo of female proband and mother; nothing missed by DeepTrio.
@@ -126,13 +118,11 @@ workflow mecv_femalemomduo {
         bam_ch // tuple with meta, bams, and indices. Meta has proband_sex, proband_id, mother_id, father_id
         fasta
         fai
-        par_bed
     main:
         // family
         deeptrio(bam_ch, fasta, fai)
-           .set{ cv_out }
     emit:
-        cv_out
+        deeptrio.out
 }
 
 // Male duo with father; DeepTrio misses X chromosome for both.
@@ -161,6 +151,7 @@ workflow mecv_maledadduo {
         deepvariant1.out
            .map{ meta, cv, gvcf -> [[id: meta.id, proband_id: meta.proband_id, role: "child", sex: meta.sex], cv, gvcf] }
            .set { cv_pro }
+    emit:
         deeptrio.out
            .join(cv_dad.concat(cv_pro), remainder: true)
            .map{ it ->
@@ -171,7 +162,4 @@ workflow mecv_maledadduo {
                 [it[0], it[1], it[2]]
              }
            }
-           .set{ cv_out }
-    emit:
-        cv_out
 }

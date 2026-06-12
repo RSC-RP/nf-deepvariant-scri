@@ -14,24 +14,26 @@ include { SAMTOOLS_FAIDX } from './modules/nf-core/samtools/faidx/main'
 workflow CALL_TRIOS {
     // Reference sequence for alignment and genotype calling, which may be different from Ensembl.
     channel.fromPath(file(params.fasta_bams, checkIfExists: true))
+        .map{ fasta -> [[id: fasta.simpleName], fasta]}
         .collect() // allows the reference to be used with multiple input VCFs
         .set{ fasta_bams }
     fai_file2 = file("${params.fasta_bams}.fai")
     if( fai_file2.exists() ){
         channel.fromPath(fai_file2)
+            .map{ fai -> [[id: fai.simpleName], fai]}
             .collect()
             .set{ fai_bams }
     }
     else {
         // Run Samtools Faidx
-        SAMTOOLS_FAIDX(fasta_bams)
+        SAMTOOLS_FAIDX(fasta_bams, false)
         SAMTOOLS_FAIDX.out.fai
             .collect()
             .set{ fai_bams }
     }
 
     // Read in sample list
-    Channel.fromPath(file(params.sample_bams, checkIfExists: true))
+    channel.fromPath(file(params.sample_bams, checkIfExists: true))
         .splitCsv(header: true, sep: ',')
         .map{
             row ->
@@ -44,68 +46,66 @@ workflow CALL_TRIOS {
                 ]
             }
         .transpose()
-        .filter{ it[1].id != "" & it[2] != "" }
-        .map{ [it[0], it[1], file(it[2], checkIfExists: true), it[3]] }
+        .filter{ _meta_family, meta_individual, bam, _bai -> meta_individual.id != "" & bam != "" }
+        .map{ meta_family, meta_individual, bam, bai -> [meta_family, meta_individual, file(bam, checkIfExists: true), bai] }
         .set{ input_ch }
     
     // check sex specification
     input_ch
-        .map{ assert ["Male", "male", "M", "Female", "female", "F"].contains(it[0].proband_sex) }
+        .map{ _meta_family, meta_individual, _bam, _bai ->
+        assert ["Male", "male", "M", "Female", "female", "F"].contains( meta_individual.proband_sex)
+        }
 
     // Get a channel just for looking up metadata again
     input_ch
-        .map{ [it[1], it[0]] }
+        .map{ meta_family, meta_individual, _bam, _bai -> [meta_individual, meta_family] }
         .set{ meta_lookup }
 
     // Split off into samples input as bams vs fastqs
     input_ch
-        .branch{ it ->
-            fastq: it[2].name.endsWith(".fq.gz") | it[2].name.endsWith(".fastq.gz") | it[2].name.endsWith(".fq") | it[2].name.endsWith(".fastq")
+        .branch{ _meta_family, _meta_individual, bam, _bai ->
+            fastq: bam.name.endsWith(".fq.gz") | bam.name.endsWith(".fastq.gz") | bam.name.endsWith(".fq") | bam.name.endsWith(".fastq")
             bam: true // get everything else
         }
         .set{ input_ch }
 
     // Align FASTQ files
     input_ch.fastq
-        .map{ [it[1], it[2]] } // get metadata and fastq
+        .map{ _meta_family, meta_individual, fastq, _empty -> [meta_individual, fastq] } // get metadata and fastq
         .set{ fastq_ch }
-    fasta_bams
-        .map{ [[id: it.simpleName], it]}
-        .collect()
-        .set{ fasta_for_bwa }
-    Channel.fromPath(params.bwa_index)
-        .map{ [[id: it.simpleName], it]}
+    channel.fromPath(params.bwa_index)
+        .map{ index -> [[id: index.simpleName], index]}
         .collect()
         .set{ bwa_index }
-    BWA_MEM(fastq_ch, bwa_index, fasta_for_bwa, true)
+    BWA_MEM(fastq_ch, bwa_index, fasta_bams, true)
 
     // Combine new aligned bams with any existing bams
     BWA_MEM.out.bam
         .join(meta_lookup)
-        .map{ [it[2], it[0], it[1], ""]}
+        .map{ meta_individual, bam, meta_family -> [meta_family, meta_individual, bam, ""]}
         .concat(input_ch.bam)
         .set{ bam_ch }
     
     // Index any BAMS with missing index
     bam_ch
-        .branch{ it ->
-            needs_index: it[3] == ""
+        .branch{ _meta_family, _meta_individual, _bam, bai ->
+            needs_index: bai == ""
             indexed: true
         }
         .set{ bam_ch }
     bam_ch.needs_index
-        .map{ [it[1], it[2]] }
+        .map{ _meta_family, meta_individual, bam, _bai -> [meta_individual, bam] }
         .set{ bams_to_index }
     SAMTOOLS_INDEX(bams_to_index)
 
     // Join back in with indexed BAMs
     bam_ch.indexed
-        .map{ [it[0], it[1], it[2], file(it[3], checkIfExists: true)] }
+        .map{ meta_family, meta_individual, bam, bai -> [meta_family, meta_individual, bam, file(bai, checkIfExists: true)] }
         .set{ bams_indexed }
     bams_to_index
        .join(SAMTOOLS_INDEX.out.bai)
        .join(meta_lookup)
-       .map{ [it[3], it[0], it[1], it[2]] }
+       .map{ meta_individual, bam, bai, meta_family -> [meta_family, meta_individual, bam, bai] }
        .concat(bams_indexed)
        .set{ bam_ch }
 
@@ -125,13 +125,13 @@ workflow CALL_TRIOS {
         .set{bam_ch}
     
     // Variant calling on families
-    Channel.fromPath(file(params.par_bed, checkIfExists: true))
+    channel.fromPath(file(params.par_bed, checkIfExists: true))
         .collect()
         .set{ par_bed }
     mecv_maletrio(bam_ch.maletrio, fasta_bams, fai_bams, par_bed)
     mecv_femaletrio_dadduo(bam_ch.femaleWdad, fasta_bams, fai_bams, par_bed)
     mecv_malemomduo(bam_ch.malemomduo, fasta_bams, fai_bams, par_bed)
-    mecv_femalemomduo(bam_ch.femalemomduo, fasta_bams, fai_bams, par_bed)
+    mecv_femalemomduo(bam_ch.femalemomduo, fasta_bams, fai_bams)
     mecv_maledadduo(bam_ch.maledadduo, fasta_bams, fai_bams, par_bed)
     // Variant calling on singletons
     mecv_single(bam_ch.single, fasta_bams, fai_bams, par_bed)
@@ -148,7 +148,7 @@ workflow CALL_TRIOS {
     // Postprocess both together
     POSTPROCESS_VARIANTS(call_variants_out, fasta_bams, fai_bams, par_bed)
     POSTPROCESS_VARIANTS.out
-        .map{ [it[1], it[2]] }
+        .map{ _meta, gvcf, tbi -> [gvcf, tbi] }
         .collect()
         .set{ all_ind_vcfs }
 
