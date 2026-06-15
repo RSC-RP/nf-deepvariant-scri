@@ -1,5 +1,5 @@
 process CALL_VARIANTS_SINGLE {
-    container "docker://google/deepvariant:1.8.0-gpu"
+    container "docker://google/deepvariant:1.10.0-gpu"
     tag "$meta.id"
     label "call_variants"
 

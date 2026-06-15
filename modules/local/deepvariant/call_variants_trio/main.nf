@@ -1,5 +1,5 @@
 process CALL_VARIANTS_TRIO {
-    container "docker://google/deepvariant:deeptrio-1.8.0-gpu"
+    container "docker://google/deepvariant:deeptrio-1.10.0-gpu"
     tag "$meta.id"
     label "call_variants"
 

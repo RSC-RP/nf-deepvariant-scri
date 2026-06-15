@@ -1,6 +1,6 @@
 process MAKE_EXAMPLES_SINGLE {
     tag "$meta.id"
-    container "docker://google/deepvariant:1.8.0-gpu"
+    container "docker://google/deepvariant:1.10.0-gpu"
     label "make_examples"
 
     input:

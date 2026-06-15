@@ -1,6 +1,6 @@
 process MAKE_EXAMPLES_TRIO {
     tag "$meta.proband_id"
-    container "docker://google/deepvariant:deeptrio-1.8.0-gpu"
+    container "docker://google/deepvariant:deeptrio-1.10.0-gpu"
     label "make_examples"
 
     input:
