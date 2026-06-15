@@ -1,6 +1,5 @@
 process POSTPROCESS_VARIANTS {
     container "docker://google/deepvariant:deeptrio-1.8.0-gpu"
-    publishDir "${params.outdir}/gvcfs/", mode: 'copy', overwrite: true
     tag "$meta.id"
 
     input:

@@ -25,6 +25,7 @@ params {
 
 // workflow for variant calling on trios, duos, or singletons
 workflow {
+    main:
     assert params.deepvar_model == "WGS" | params.deepvar_model == "WES"
     assert params.genome_ver == "hg19" | params.genome_ver == "hg38"
     assert params.chromnames == "g1k" | params.chromnames == "ensembl" | params.chromnames == "ucsc"
@@ -91,5 +92,22 @@ workflow {
         .set{ all_ind_vcfs }
 
     // gl_nexus for joint VCF
-    GLNEXUS(all_ind_vcfs, params.cohort_name, params.glnexus_filter, params.deepvar_model) 
+    GLNEXUS(all_ind_vcfs, params.cohort_name, params.glnexus_filter, params.deepvar_model)
+
+    // OUTPUT
+    publish:
+    gvcfs = POSTPROCESS_VARIANTS.out
+    bcf = GLNEXUS.out
+}
+
+output {
+    gvcfs: Channel<Path> {
+        path "gvcfs"
+        index {
+            path 'gvcfs.json'
+        }
+    }
+    bcf: Channel<Path> {
+        path '.'
+    }
 }
