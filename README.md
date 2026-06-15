@@ -82,6 +82,9 @@ nextflow run main.nf \
 
 ## Running the pipeline
 
+Replace "params/myparams.yml" with your parameters file, and "results" within your
+desired output directory.
+
 ``` bash
 nextflow run main.nf \
     -profile sasquatch \
@@ -89,3 +92,17 @@ nextflow run main.nf \
     -params-file params/myparams.yml \
     -resume
 ```
+
+After the pipeline is done, there will be a directory called `temp_deepvariant`
+in your user directory, which you can delete unless you need it for debugging.
+
+## Outputs
+
+* In your output directory, a file ending in `.bcf` contains the joint genotype
+calls.  You may preview it using `bcftools view` and piping to `less`.
+
+* In the `gvcfs` directory within your output directory, there are indexed gVCF
+files containing variant calling for each individual.
+
+* A file called `gvcfs.json` lists metadata for each individual along with the
+paths to their gVCF file and index.
