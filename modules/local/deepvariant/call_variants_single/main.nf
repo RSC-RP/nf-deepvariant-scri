@@ -6,6 +6,8 @@ process CALL_VARIANTS_SINGLE {
     // me_tfrecord is output from make_examples.  role is "child" or "parent".
     input:
     tuple val(meta), path(me_tfrecord), path(gvcf_tfrecord), path(example_info) // meta has id, proband_id, and role
+    val(deepvar_model)
+    val(nshards)
 
     output:
     tuple val(meta), path("call_variants*.tfrecord.gz"), path(gvcf_tfrecord)
@@ -30,8 +32,8 @@ process CALL_VARIANTS_SINGLE {
         call_variants \
         --batch_size 384 \
         --outfile "call_variants\${value}_${sample_id}.tfrecord.gz" \
-        --examples "make_examples\${value}.tfrecord@${params.make_examples_nshards}.gz" \
-        --checkpoint /opt/models/${params.deepvar_model.toLowerCase()}
+        --examples "make_examples\${value}.tfrecord@${nshards}.gz" \
+        --checkpoint /opt/models/${deepvar_model.toLowerCase()}
     done
     """
 

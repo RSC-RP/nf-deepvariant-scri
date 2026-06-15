@@ -10,11 +10,16 @@ workflow mecv_single {
         fasta
         fai
         par_bed
+        test_bams
+        genome_ver
+        chromnames
+        deepvar_model
+        nshards
     main:
         bam_ch
             .map{ meta, bam, index -> [meta + [id: meta.proband_id], bam, index] }
             .set{ bam_ch }
-        deepvariant(bam_ch, fasta, fai, par_bed, false, false)
+        deepvariant(bam_ch, fasta, fai, par_bed, false, false, test_bams, genome_ver, chromnames, deepvar_model, nshards)
     emit:
         deepvariant.out
 }
@@ -26,14 +31,19 @@ workflow mecv_maletrio {
         fasta
         fai
         par_bed
+        test_bams
+        genome_ver
+        chromnames
+        deepvar_model
+        nshards
     main:
         // family
-        deeptrio(bam_ch, fasta, fai)
+        deeptrio(bam_ch, fasta, fai, test_bams, genome_ver, chromnames, deepvar_model, nshards)
         // just the father
         bam_ch
             .map{ meta, bams, indices -> [meta + [id: meta.father_id], bams[1], indices[1]] }
             .set{ bam_dad }
-        deepvariant(bam_dad, fasta, fai, par_bed, true, false) // last two booleans specify X chrom
+        deepvariant(bam_dad, fasta, fai, par_bed, true, false, test_bams, genome_ver, chromnames, deepvar_model, nshards) // last two booleans specify X chrom
         deepvariant.out
            .map{ meta, cv, gvcf -> [[id: meta.id, proband_id: meta.proband_id, role: "parent", sex: meta.sex], cv, gvcf] }
            .set { cv_dad }
@@ -57,14 +67,19 @@ workflow mecv_femaletrio_dadduo {
         fasta
         fai
         par_bed
+        test_bams
+        genome_ver
+        chromnames
+        deepvar_model
+        nshards
     main:
         // family
-        deeptrio(bam_ch, fasta, fai)
+        deeptrio(bam_ch, fasta, fai, test_bams, genome_ver, chromnames, deepvar_model, nshards)
         // just the father
         bam_ch
             .map{ meta, bams, indices -> [meta + [id: meta.father_id], bams[1], indices[1]] }
             .set{ bam_dad }
-        deepvariant(bam_dad, fasta, fai, par_bed, false, true) // last two booleans specify Y chrom
+        deepvariant(bam_dad, fasta, fai, par_bed, false, true, test_bams, genome_ver, chromnames, deepvar_model, nshards) // last two booleans specify Y chrom
         deepvariant.out
            .map{ meta, cv, gvcf -> [[id: meta.id, proband_id: meta.proband_id, role: "parent", sex: meta.sex], cv, gvcf] }
            .set { cv_dad }
@@ -88,14 +103,19 @@ workflow mecv_malemomduo {
         fasta
         fai
         par_bed
+        test_bams
+        genome_ver
+        chromnames
+        deepvar_model
+        nshards
     main:
         // family
-        deeptrio(bam_ch, fasta, fai)
+        deeptrio(bam_ch, fasta, fai, test_bams, genome_ver, chromnames, deepvar_model, nshards)
         // just the proband
         bam_ch
             .map{ meta, bams, indices -> [meta + [id: meta.proband_id], bams[0], indices[0]] }
             .set{ bam_pro }
-        deepvariant(bam_pro, fasta, fai, par_bed, false, true) // last two booleans specify Y chrom
+        deepvariant(bam_pro, fasta, fai, par_bed, false, true, test_bams, genome_ver, chromnames, deepvar_model, nshards) // last two booleans specify Y chrom
         deepvariant.out
            .map{ meta, cv, gvcf -> [[id: meta.id, proband_id: meta.proband_id, role: "child", sex: meta.sex], cv, gvcf] }
            .set { cv_pro }
@@ -118,9 +138,14 @@ workflow mecv_femalemomduo {
         bam_ch // tuple with meta, bams, and indices. Meta has proband_sex, proband_id, mother_id, father_id
         fasta
         fai
+        test_bams
+        genome_ver
+        chromnames
+        deepvar_model
+        nshards
     main:
         // family
-        deeptrio(bam_ch, fasta, fai)
+        deeptrio(bam_ch, fasta, fai, test_bams, genome_ver, chromnames, deepvar_model, nshards)
     emit:
         deeptrio.out
 }
@@ -132,14 +157,19 @@ workflow mecv_maledadduo {
         fasta
         fai
         par_bed
+        test_bams
+        genome_ver
+        chromnames
+        deepvar_model
+        nshards
     main:
         // family
-        deeptrio(bam_ch, fasta, fai)
+        deeptrio(bam_ch, fasta, fai, test_bams, genome_ver, chromnames, deepvar_model, nshards)
         // just the father
         bam_ch
             .map{ meta, bams, indices -> [meta + [id: meta.father_id], bams[1], indices[1]] }
             .set{ bam_dad }
-        deepvariant(bam_dad, fasta, fai, par_bed, true, false) // last two booleans specify X chrom
+        deepvariant(bam_dad, fasta, fai, par_bed, true, false, test_bams, genome_ver, chromnames, deepvar_model, nshards) // last two booleans specify X chrom
         deepvariant.out
            .map{ meta, cv, gvcf -> [[id: meta.id, proband_id: meta.proband_id, role: "parent", sex: meta.sex], cv, gvcf] }
            .set { cv_dad }
@@ -147,7 +177,7 @@ workflow mecv_maledadduo {
         bam_ch
             .map{ meta, bams, indices -> [meta + [id: meta.proband_id], bams[0], indices[0]] }
             .set{ bam_pro }
-        deepvariant1(bam_pro, fasta, fai, par_bed, true, false) // last two booleans specify X chrom
+        deepvariant1(bam_pro, fasta, fai, par_bed, true, false, test_bams, genome_ver, chromnames, deepvar_model, nshards) // last two booleans specify X chrom
         deepvariant1.out
            .map{ meta, cv, gvcf -> [[id: meta.id, proband_id: meta.proband_id, role: "child", sex: meta.sex], cv, gvcf] }
            .set { cv_pro }

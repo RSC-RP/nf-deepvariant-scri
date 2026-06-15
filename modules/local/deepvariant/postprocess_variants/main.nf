@@ -8,6 +8,7 @@ process POSTPROCESS_VARIANTS {
     path(fasta_ensembl)
     path(fai_ensembl)
     path(par_bed)
+    val(chromnames) // "g1k", "ensembl", or "ucsc"
 
     output:
     tuple val(meta), path(out_gvcf), path("${out_gvcf}.tbi")
@@ -28,7 +29,7 @@ process POSTPROCESS_VARIANTS {
     // haploid contigs for males
     is_male = meta.sex == "Male" || meta.sex == "male" || meta.sex == "M"
     if(is_male){
-        pr = params.chromnames == "ucsc" ? "chr" : ""
+        pr = chromnames == "ucsc" ? "chr" : ""
         hapstring = "--haploid_contigs=\"${pr}X,${pr}Y\" --par_regions_bed=\"${par_bed}\""
     }
     else{

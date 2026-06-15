@@ -1,0 +1,17 @@
+# If you aren't sure how to set some of these, look at conf/test.config for
+# paths to example files. Anything null in this example should be filled in, and
+# you may wish to modify some other parameters.
+
+sample_bams: null         # path to CSV file listing bams for import
+deepvar_model: null       # Should be 'WGS' or 'WES'.
+cohort_name: null         # string to use for naming output VCFs
+chromnames: 'ensembl' # Format for chromosome names input. 'g1k' = 1000 Genomes. Alternatives are 'ensembl' and 'ucsc'. Use 'ucsc' if chromosome names start with 'chr'
+genome_ver: 'hg19'
+make_examples_nshards: 32 # threads to use in DeepVariant
+# FASTA that was used (or should be used) for aligning the BAMs
+fasta_bams: '/data/hps/assoc/public/bioinformatics/annotations/Homo_sapiens/Ensembl/GRCh37/Sequence/WholeGenomeFasta/Homo_sapiens.GRCh37.dna.primary_assembly.fa'
+# BWA index to go with this FASTA
+bwa_index: '/data/hps/assoc/public/bioinformatics/annotations/Homo_sapiens/Ensembl/GRCh37/Sequence/BWAIndex'
+par_bed: 'assets/GRCh37_PAR.bed' # Haploid regions for DeepVariant
+# Set to true to use DeepVariantWGS/DeepVariantWES, or false to use DeepVariant_unfiltered
+glnexus_filter: true

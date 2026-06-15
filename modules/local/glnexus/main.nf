@@ -6,12 +6,14 @@ process GLNEXUS {
     input:
         path(gvcfs)
         val(cohort_name)
+        val(glnexus_filter)
+        val(deepvar_model)
     output:
         path(outbcf)
     script:
         outbcf = "${cohort_name}.glnexus.bcf"
-        if(params.glnexus_filter){
-            mod = params.deepvar_model
+        if(glnexus_filter){
+            mod = deepvar_model
         }
         else {
             mod = '_unfiltered'

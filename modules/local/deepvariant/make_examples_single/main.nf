@@ -10,6 +10,9 @@ process MAKE_EXAMPLES_SINGLE {
     path(par_bed)
     val(x_only) // boolean
     val(y_only) // boolean
+    val(test_bams) // boolean
+    val(genome_ver) // "hg19" or "hg38"
+    val(chromnames) // "g1k", "ensembl", or "ucsc"
 
     output:
     tuple val(meta2), path("make_examples*.tfrecord*.gz"), path("gvcf*.tfrecord*.gz"), emit: proband_tfrecord
@@ -24,7 +27,7 @@ process MAKE_EXAMPLES_SINGLE {
     if(!is_male){
         assert meta.id == meta.mother_id || meta.proband_sex == "Female" || meta.proband_sex == "female" || meta.proband_sex == "F"
     }
-    if(params.test_bams){
+    if(test_bams){
         assert meta.proband_id.startsWith("HG00") && bam.size() < 50000000
     }
     def proband_id = meta.id
@@ -32,13 +35,13 @@ process MAKE_EXAMPLES_SINGLE {
     meta2 = meta + [sex: is_male ? "Male" : "Female"]
 
     // Set start and end points for X and Y
-    if(params.annovar_buildver == "hg19"){
+    if(genome_ver == "hg19"){
         startX = 2734540
         endX = 154997473
         startY = 2649521
         endY = 59034049
     }
-    if(params.annovar_buildver == "hg38"){
+    if(genome_ver == "hg38"){
         startX = 2781480
         endX = 155701382
         startY = 2781480
@@ -46,10 +49,10 @@ process MAKE_EXAMPLES_SINGLE {
     }
 
     // Chromosome prefix
-    if(params.chromnames == "g1k" || params.chromnames == "ensembl"){
+    if(chromnames == "g1k" || chromnames == "ensembl"){
         pr = ""
     }
-    if(params.chromnames == "ucsc"){
+    if(chromnames == "ucsc"){
         pr = "chr"
     }
 
@@ -63,7 +66,7 @@ process MAKE_EXAMPLES_SINGLE {
     }
 
     if(x_only){
-        if(params.test_bams){
+        if(test_bams){
             regions = "--regions ${pr}X:122530000-122550000"
         }
         else{
@@ -75,7 +78,7 @@ process MAKE_EXAMPLES_SINGLE {
         regions = "--regions ${pr}Y:${startY}-${endY}"
         chunk = '4'
     }
-    else if(params.test_bams){
+    else if(test_bams){
         // Tiny example region of the genome for demo
         regions = "--regions \"${pr}2:179300000-179600000 ${pr}16:450000-470000 ${pr}X:122530000-122550000\""
         chunk = '1'

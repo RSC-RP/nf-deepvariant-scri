@@ -7,6 +7,9 @@ process MAKE_EXAMPLES_TRIO {
     tuple val(meta), path(bams), path(bais) // meta has proband_sex, proband_id, father_id, mother_id
     path(fasta_bams)
     path(fai_bams)
+    val(test_bams) // boolean
+    val(genome_ver) // "hg19" or "hg38"
+    val(chromnames) // "g1k", "ensembl", or "ucsc"
 
     output:
     tuple val(meta2), path("make_examples*_child.tfrecord*.gz"), path("gvcf*_child.tfrecord*.gz"), emit: proband_tfrecord
@@ -21,7 +24,7 @@ process MAKE_EXAMPLES_TRIO {
     if(!is_male){
         assert meta.proband_sex == "Female" || meta.proband_sex == "female" || meta.proband_sex == "F"
     }
-    if(params.test_bams){
+    if(test_bams){
         assert is_male && meta.proband_id.startsWith("HG00") && bams[0].size() < 50000000
     }
     def proband_id = meta.proband_id
@@ -31,7 +34,7 @@ process MAKE_EXAMPLES_TRIO {
     meta3 = [proband_id: proband_id]
     meta4 = [id: father_id, proband_id: proband_id, role: "parent", sex: "Male"]
     meta5 = [id: mother_id, proband_id: proband_id, role: "parent", sex: "Female"]
-    if(params.annovar_buildver == "hg19"){
+    if(genome_ver == "hg19"){
         par1endX = 2734539
         startX = 2734540
         endX = 154997473
@@ -40,7 +43,7 @@ process MAKE_EXAMPLES_TRIO {
         startY = 2649521
         endY = 59034049
     }
-    if(params.annovar_buildver == "hg38"){
+    if(genome_ver == "hg38"){
         par1endX = 2781479
         startX = 2781480
         endX = 155701382
@@ -50,10 +53,10 @@ process MAKE_EXAMPLES_TRIO {
         endY = 56887902
     }
     // Chromosome prefix
-    if(params.chromnames == "g1k" || params.chromnames == "ensembl"){
+    if(chromnames == "g1k" || chromnames == "ensembl"){
         pr = ""
     }
-    if(params.chromnames == "ucsc"){
+    if(chromnames == "ucsc"){
         pr = "chr"
     }
     autosomes = "${pr}1 ${pr}2 ${pr}3 ${pr}4 ${pr}5 ${pr}6 ${pr}7 ${pr}8 ${pr}9 ${pr}10 ${pr}11 ${pr}12 ${pr}13 ${pr}14 ${pr}15 ${pr}16 ${pr}17 ${pr}18 ${pr}19 ${pr}20 ${pr}21 ${pr}22"
@@ -66,7 +69,7 @@ process MAKE_EXAMPLES_TRIO {
              "--reads=${bams[0]} --sample_name ${proband_id} $args"].join(' ').trim()
     
     // Tiny example region of the genome for demo
-    if(params.test_bams)
+    if(test_bams)
     """
     mkdir tmp2
     export TMPDIR=tmp2
