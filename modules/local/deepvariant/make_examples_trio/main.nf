@@ -5,8 +5,8 @@ process MAKE_EXAMPLES_TRIO {
 
     input:
     tuple val(meta), path(bams), path(bais) // meta has proband_sex, proband_id, father_id, mother_id
-    path(fasta_bams)
-    path(fai_bams)
+    tuple val(meta2), path(fasta_bams)
+    tuple val(meta3), path(fai_bams)
     val(test_bams) // boolean
     val(genome_ver) // "hg19" or "hg38"
     val(chromnames) // "g1k", "ensembl", or "ucsc"

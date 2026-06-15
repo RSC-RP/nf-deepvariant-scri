@@ -27,8 +27,8 @@ workflow make_bams {
     
     // check sex specification
     input_ch
-        .map{ _meta_family, meta_individual, _bam, _bai ->
-        assert ["Male", "male", "M", "Female", "female", "F"].contains( meta_individual.proband_sex)
+        .map{ meta_family, _meta_individual, _bam, _bai ->
+        assert ["Male", "male", "M", "Female", "female", "F"].contains( meta_family.proband_sex)
         }
 
     // Get a channel just for looking up metadata again
@@ -63,21 +63,17 @@ workflow make_bams {
         .map{ _meta_family, meta_individual, bam, _bai -> [meta_individual, bam] }
     SAMTOOLS_INDEX(bams_to_index)
 
-    // Join back in with indexed BAMs
+    // Join back in with indexed BAMs, and get BAMS back into proband-father-mother order and split families from singletons
     bams_indexed = bam_ch.indexed
         .map{ meta_family, meta_individual, bam, bai -> [meta_family, meta_individual, bam, file(bai, checkIfExists: true)] }
     bam_ch = bams_to_index
-       .join(SAMTOOLS_INDEX.out.bai)
-       .join(meta_lookup)
-       .map{ meta_individual, bam, bai, meta_family -> [meta_family, meta_individual, bam, bai] }
-       .concat(bams_indexed)
-
-    emit:
-    // Get BAMS back into proband-father-mother order and split families from singletons
-    bam_ch
+        .join(SAMTOOLS_INDEX.out.index)
+        .join(meta_lookup)
+        .map{ meta_individual, bam, bai, meta_family -> [meta_family, meta_individual, bam, bai] }
+        .concat(bams_indexed)
         .map{ meta_family, meta_individual, bam, bai ->
-            [ meta_family, meta_individual.plus([bam: bam, index: bai])]
-        }
+             [ meta_family, meta_individual.plus([bam: bam, index: bai])]
+         }
         .groupBy()
         .map{ meta_family, meta_ind_bams ->
             def mylist = meta_ind_bams.toList().sort{ it -> it.ord }
@@ -95,4 +91,11 @@ workflow make_bams {
             femalemomduo: ["Female", "female", "F"].contains(meta_family.proband_sex) & meta_family.father_id == "" & meta_family.mother_id != ""
             maledadduo: ["Male", "male", "M"].contains(meta_family.proband_sex) & meta_family.father_id != "" & meta_family.mother_id == ""
         }
+    emit:
+    single = bam_ch.single
+    maletrio = bam_ch.maletrio
+    femaleWdad = bam_ch.femaleWdad
+    malemomduo = bam_ch.malemomduo
+    femalemomduo = bam_ch.femalemomduo
+    maledadduo = bam_ch.maledadduo
 }

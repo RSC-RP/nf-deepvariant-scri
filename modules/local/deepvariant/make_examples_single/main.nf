@@ -5,8 +5,8 @@ process MAKE_EXAMPLES_SINGLE {
 
     input:
     tuple val(meta), path(bam), path(bai) // meta has proband_sex, proband_id, father_id, mother_id, id
-    path(fasta_bams)
-    path(fai_bams)
+    tuple val(meta2), path(fasta_bams)
+    tuple val(meta3), path(fai_bams)
     path(par_bed)
     val(x_only) // boolean
     val(y_only) // boolean

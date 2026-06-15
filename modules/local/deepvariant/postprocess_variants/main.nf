@@ -4,8 +4,8 @@ process POSTPROCESS_VARIANTS {
 
     input:
     tuple val(meta), path(cv_tfrecord), path(gvcf_tfrecord)
-    path(fasta_ensembl)
-    path(fai_ensembl)
+    tuple val(meta2), path(fasta)
+    tuple val(meta3), path(fai)
     path(par_bed)
     val(chromnames) // "g1k", "ensembl", or "ucsc"
 
@@ -43,7 +43,7 @@ process POSTPROCESS_VARIANTS {
     for value in $tfr_string
     do
         postprocess_variants \
-        --ref $fasta_ensembl \
+        --ref $fasta \
         --infile "call_variants\${value}_${sample_id}@${cv_shards}.tfrecord.gz" \
         --outfile temp.vcf.gz \
         --nonvariant_site_tfrecord_path "gvcf\${value}.tfrecord@${gvcf_shards}.gz" \

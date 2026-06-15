@@ -61,19 +61,18 @@ workflow {
     
     // Align and index if necessary
     make_bams(input_ch, fasta_bams, bwa_index)
-    bam_ch = make_bams.out
     
     // Variant calling on families
     channel.fromPath(file(params.par_bed, checkIfExists: true))
         .collect()
         .set{ par_bed }
-    mecv_maletrio(bam_ch.maletrio, fasta_bams, fai_bams, par_bed, params.test_bams, params.genome_ver, params.chromnames, params.deepvar_model, params.make_examples_nshards)
-    mecv_femaletrio_dadduo(bam_ch.femaleWdad, fasta_bams, fai_bams, par_bed, params.test_bams, params.genome_ver, params.chromnames, params.deepvar_model, params.make_examples_nshards)
-    mecv_malemomduo(bam_ch.malemomduo, fasta_bams, fai_bams, par_bed, params.test_bams, params.genome_ver, params.chromnames, params.deepvar_model, params.make_examples_nshards)
-    mecv_femalemomduo(bam_ch.femalemomduo, fasta_bams, fai_bams, params.test_bams, params.genome_ver, params.chromnames, params.deepvar_model, params.make_examples_nshards)
-    mecv_maledadduo(bam_ch.maledadduo, fasta_bams, fai_bams, par_bed, params.test_bams, params.genome_ver, params.chromnames, params.deepvar_model, params.make_examples_nshards)
+    mecv_maletrio(make_bams.out.maletrio, fasta_bams, fai_bams, par_bed, params.test_bams, params.genome_ver, params.chromnames, params.deepvar_model, params.make_examples_nshards)
+    mecv_femaletrio_dadduo(make_bams.out.femaleWdad, fasta_bams, fai_bams, par_bed, params.test_bams, params.genome_ver, params.chromnames, params.deepvar_model, params.make_examples_nshards)
+    mecv_malemomduo(make_bams.out.malemomduo, fasta_bams, fai_bams, par_bed, params.test_bams, params.genome_ver, params.chromnames, params.deepvar_model, params.make_examples_nshards)
+    mecv_femalemomduo(make_bams.out.femalemomduo, fasta_bams, fai_bams, params.test_bams, params.genome_ver, params.chromnames, params.deepvar_model, params.make_examples_nshards)
+    mecv_maledadduo(make_bams.out.maledadduo, fasta_bams, fai_bams, par_bed, params.test_bams, params.genome_ver, params.chromnames, params.deepvar_model, params.make_examples_nshards)
     // Variant calling on singletons
-    mecv_single(bam_ch.single, fasta_bams, fai_bams, par_bed, params.test_bams, params.genome_ver, params.chromnames, params.deepvar_model, params.make_examples_nshards)
+    mecv_single(make_bams.out.single, fasta_bams, fai_bams, par_bed, params.test_bams, params.genome_ver, params.chromnames, params.deepvar_model, params.make_examples_nshards)
 
     // Join together families and singletons
     mecv_single.out
