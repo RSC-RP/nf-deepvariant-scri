@@ -22,9 +22,9 @@ In the `testdata` directory there are some CSVs that you can use as a template
 for creating your own sample sheet.
 
 If you have BAMs, list each BAM and its index in the appropriate fields (see
-file headers). If you have FASTQs, put the FASTQs in the "BAM" columns, using
-a wildcard character if necessary for paired end data, and leave the index
-column blank.
+file headers). If the BAM is not indexed, just leave the index field blank.
+If you have FASTQs, put the FASTQs in the "BAM" columns, using a wildcard
+character if necessary for paired end data, and leave the index field blank.
 
 If working with duos or trios, there will be one line per duo or trio. If there
 are siblings in the dataset, you will need one line for each sibling, and you
