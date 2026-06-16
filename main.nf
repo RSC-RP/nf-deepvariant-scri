@@ -64,14 +64,10 @@ workflow {
     make_bams(input_ch, fasta_bams, bwa_index)
 
     // Check relatedness and sex in BAMs
-    bams_ch = make_bams.out.maletrio
-        .concat(make_bams.out.femaleWdad)
-        .concat(make_bams.out.malemomduo)
-        .concat(make_bams.out.femalemomduo)
-        .concat(make_bams.out.maledadduo)
-        .concat(make_bams.out.single)
     somalier_sites = channel.fromPath(file(params.somalier_sites))
-    somalier(input_ch, bams_ch, fasta_bams, fai_bams, somalier_sites)
+        .map{it -> [[id: it.baseName], it] }
+        .collect()
+    somalier(input_ch, make_bams.out.allbams, fasta_bams, fai_bams, somalier_sites)
     
     // Variant calling on families
     channel.fromPath(file(params.par_bed, checkIfExists: true))

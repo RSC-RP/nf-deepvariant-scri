@@ -71,6 +71,7 @@ workflow make_bams {
         .join(meta_lookup)
         .map{ meta_individual, bam, bai, meta_family -> [meta_family, meta_individual, bam, bai] }
         .concat(bams_indexed)
+    bams_grouped = bam_ch
         .map{ meta_family, meta_individual, bam, bai ->
              [ meta_family, meta_individual.plus([bam: bam, index: bai])]
          }
@@ -92,10 +93,11 @@ workflow make_bams {
             maledadduo: ["Male", "male", "M"].contains(meta_family.proband_sex) & meta_family.father_id != "" & meta_family.mother_id == ""
         }
     emit:
-    single = bam_ch.single
-    maletrio = bam_ch.maletrio
-    femaleWdad = bam_ch.femaleWdad
-    malemomduo = bam_ch.malemomduo
-    femalemomduo = bam_ch.femalemomduo
-    maledadduo = bam_ch.maledadduo
+    single = bams_grouped.single
+    maletrio = bams_grouped.maletrio
+    femaleWdad = bams_grouped.femaleWdad
+    malemomduo = bams_grouped.malemomduo
+    femalemomduo = bams_grouped.femalemomduo
+    maledadduo = bams_grouped.maledadduo
+    allbams = bam_ch.map{ _meta_family, meta_individual, bam, bai -> [meta_individual, bam, bai] }
 }

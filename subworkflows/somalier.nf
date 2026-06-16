@@ -10,7 +10,6 @@ workflow somalier {
     sites
 
     main:
-    // need to change chromosome names for sites file for ensembl/g1k hg19
     SOMALIER_EXTRACT(bams_ch, fasta, fai, sites)
     // Get sample name from BAM for pedigree
     sample_lookup = SOMALIER_EXTRACT.out.extract
@@ -26,4 +25,5 @@ workflow somalier {
 
     emit:
     extract = SOMALIER_EXTRACT.out.extract
+    lookup = sample_lookup
 }
