@@ -114,3 +114,6 @@ set of samples.
 * The pedigree used for Somalier ends with `.somalier.ped`. It may be useful for
 input to variant filtering with Slivar, but will need phenotypes to be filled in,
 and possibly sample names to be converted to how they are in the VCF.
+
+* The `somalier_relate` directory contains TSV and HTML output from `somalier relate`,
+to be used for confirming sex and relatedness of samples.

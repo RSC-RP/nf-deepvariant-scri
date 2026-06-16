@@ -106,6 +106,9 @@ workflow {
     bcf = GLNEXUS.out
     somalier_extract = somalier.out.extract
     pedigree = somalier.out.pedigree
+    html = somalier.out.html
+    samples_tsv = somalier.out.samples_tsv
+    pairs_tsv = somalier.out.pairs_tsv
 }
 
 output {
@@ -126,5 +129,14 @@ output {
     }
     pedigree: Channel<Path> {
         path '.'
+    }
+    html: Channel<Path> {
+        path 'somalier_relate'
+    }
+    samples_tsv: Channel<Path> {
+        path 'somalier_relate'
+    }
+    pairs_tsv: Channel<Path> {
+        path 'somalier_relate'
     }
 }

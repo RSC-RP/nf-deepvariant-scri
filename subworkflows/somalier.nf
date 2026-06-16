@@ -23,11 +23,22 @@ workflow somalier {
         }
     // Build the pedigree file from the input CSV
     MAKE_PEDIGREE(input_ch, sample_lookup, cohort_name)
-    // Need to collect extract files
-    // SOMALIER_RELATE()
+    ped_ch = MAKE_PEDIGREE.out
+        .map{ ped -> [[id: cohort_name], ped]}
+    // Collect extract files, join to pedigree
+    relate_input = SOMALIER_EXTRACT.out.extract
+        .map{ _meta, extract -> extract }
+        .collect()
+        .map{ extract_list -> [[id: cohort_name], extract_list]}
+        .join(ped_ch)
+    
+    SOMALIER_RELATE(relate_input, [])
 
     emit:
     extract = SOMALIER_EXTRACT.out.extract
     lookup = sample_lookup
     pedigree = MAKE_PEDIGREE.out
+    html = SOMALIER_RELATE.out.html
+    pairs_tsv = SOMALIER_RELATE.out.pairs_tsv
+    samples_tsv = SOMALIER_RELATE.out.samples_tsv
 }
