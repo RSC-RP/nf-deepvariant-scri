@@ -106,3 +106,11 @@ files containing variant calling for each individual.
 
 * A file called `gvcfs.json` lists metadata for each individual along with the
 paths to their gVCF file and index.
+
+* The `somalier_extract` directory contains binary files with genotypes extracted
+by Somalier. These may be useful if you later run `somalier relate` with a different
+set of samples.
+
+* The pedigree used for Somalier ends with `.somalier.ped`. It may be useful for
+input to variant filtering with Slivar, but will need phenotypes to be filled in,
+and possibly sample names to be converted to how they are in the VCF.

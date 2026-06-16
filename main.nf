@@ -67,7 +67,7 @@ workflow {
     somalier_sites = channel.fromPath(file(params.somalier_sites))
         .map{it -> [[id: it.baseName], it] }
         .collect()
-    somalier(input_ch, make_bams.out.allbams, fasta_bams, fai_bams, somalier_sites)
+    somalier(input_ch, make_bams.out.allbams, fasta_bams, fai_bams, somalier_sites, params.cohort_name)
     
     // Variant calling on families
     channel.fromPath(file(params.par_bed, checkIfExists: true))
@@ -105,6 +105,7 @@ workflow {
     gvcfs = POSTPROCESS_VARIANTS.out
     bcf = GLNEXUS.out
     somalier_extract = somalier.out.extract
+    pedigree = somalier.out.pedigree
 }
 
 output {
@@ -122,5 +123,8 @@ output {
         index {
             path 'somalier_extract.json'
         }
+    }
+    pedigree: Channel<Path> {
+        path '.'
     }
 }

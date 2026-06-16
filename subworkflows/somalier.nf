@@ -1,5 +1,6 @@
 include { SOMALIER_EXTRACT } from '../modules/nf-core/somalier/extract'
 include { SOMALIER_RELATE } from '../modules/nf-core/somalier/relate'
+include { MAKE_PEDIGREE } from '../modules/local/python/make_pedigree'
 
 workflow somalier {
     take:
@@ -8,6 +9,7 @@ workflow somalier {
     fasta
     fai
     sites
+    cohort_name
 
     main:
     SOMALIER_EXTRACT(bams_ch, fasta, fai, sites)
@@ -19,11 +21,13 @@ workflow somalier {
         .collectFile(name: 'sample_lookup.txt'){ meta ->
             "${meta.id}\t${meta.sample_name}\n"
         }
-    // Need Python module to build the pedigree file from the input CSV
+    // Build the pedigree file from the input CSV
+    MAKE_PEDIGREE(input_ch, sample_lookup, cohort_name)
     // Need to collect extract files
     // SOMALIER_RELATE()
 
     emit:
     extract = SOMALIER_EXTRACT.out.extract
     lookup = sample_lookup
+    pedigree = MAKE_PEDIGREE.out
 }
