@@ -10,8 +10,16 @@ workflow somalier {
     sites
 
     main:
+    // need to change chromosome names for sites file for ensembl/g1k hg19
     SOMALIER_EXTRACT(bams_ch, fasta, fai, sites)
-    // Need sites file as param
+    // Get sample name from BAM for pedigree
+    sample_lookup = SOMALIER_EXTRACT.out.extract
+        .map{ meta, extract ->
+            meta + [ sample_name: extract.baseName ]
+        }
+        .collectFile(name: 'sample_lookup.txt'){ meta ->
+            "${meta.id}\t${meta.sample_name}\n"
+        }
     // Need Python module to build the pedigree file from the input CSV
     // Need to collect extract files
     // SOMALIER_RELATE()

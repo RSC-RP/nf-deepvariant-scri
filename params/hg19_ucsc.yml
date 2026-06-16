@@ -14,4 +14,6 @@ fasta_bams: '/data/hps/assoc/public/bioinformatics/annotations/Homo_sapiens/UCSC
 bwa_index: '/data/hps/assoc/public/bioinformatics/annotations/Homo_sapiens/UCSC/hg19/Sequence/BWAIndex'
 par_bed: 'assets/GRCh37_PAR.bed' # Haploid regions for DeepVariant
 # Set to true to use DeepVariantWGS/DeepVariantWES, or false to use DeepVariant_unfiltered
-glnexus_filter: null
+glnexus_filter: true
+# VCF of sites for Somalier to use for relatedness QC
+somalier_sites: 'https://github.com/brentp/somalier/files/3412453/sites.hg19.vcf.gz'

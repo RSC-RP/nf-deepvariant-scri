@@ -1,4 +1,5 @@
 include { make_bams } from './subworkflows/make_bams'
+include { somalier } from './subworkflows/somalier'
 include { mecv_single } from "./subworkflows/family_variant_calling"
 include { mecv_maletrio } from "./subworkflows/family_variant_calling"
 include { mecv_femaletrio_dadduo } from "./subworkflows/family_variant_calling"
@@ -21,6 +22,7 @@ params {
     bwa_index: Path // folder containing the BWA index corresponding to fasta_bams
     par_bed: Path // haploid regions for DeepVariant
     glnexus_filter: Boolean = true // Whether to use DeepVariant_unfiltered (false) or DeepVariantWES or DeepVariantWGS (true)
+    somalier_sites: Path // URL to VCF of sites to use for Somalier
 }
 
 // workflow for variant calling on trios, duos, or singletons
@@ -56,11 +58,20 @@ workflow {
         .set{ bwa_index }
 
     // Read in sample list
-    channel.fromPath(file(params.sample_bams, checkIfExists: true))
-        .set{ input_ch }
+    input_ch = channel.fromPath(file(params.sample_bams, checkIfExists: true))
     
     // Align and index if necessary
     make_bams(input_ch, fasta_bams, bwa_index)
+
+    // Check relatedness and sex in BAMs
+    bams_ch = make_bams.out.maletrio
+        .concat(make_bams.out.femaleWdad)
+        .concat(make_bams.out.malemomduo)
+        .concat(make_bams.out.femalemomduo)
+        .concat(make_bams.out.maledadduo)
+        .concat(make_bams.out.single)
+    somalier_sites = channel.fromPath(file(params.somalier_sites))
+    somalier(input_ch, bams_ch, fasta_bams, fai_bams, somalier_sites)
     
     // Variant calling on families
     channel.fromPath(file(params.par_bed, checkIfExists: true))
@@ -97,6 +108,7 @@ workflow {
     publish:
     gvcfs = POSTPROCESS_VARIANTS.out
     bcf = GLNEXUS.out
+    somalier_extract = somalier.out.extract
 }
 
 output {
@@ -108,5 +120,11 @@ output {
     }
     bcf: Channel<Path> {
         path '.'
+    }
+    somalier_extract: Channel<Path> {
+        path "somalier_extract"
+        index {
+            path 'somalier_extract.json'
+        }
     }
 }

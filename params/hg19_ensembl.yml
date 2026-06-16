@@ -15,3 +15,5 @@ bwa_index: '/data/hps/assoc/public/bioinformatics/annotations/Homo_sapiens/Ensem
 par_bed: 'assets/GRCh37_PAR.bed' # Haploid regions for DeepVariant
 # Set to true to use DeepVariantWGS/DeepVariantWES, or false to use DeepVariant_unfiltered
 glnexus_filter: true
+# VCF of sites for Somalier to use for relatedness QC
+somalier_sites: 'https://github.com/brentp/somalier/files/3412455/sites.GRCh37.vcf.gz'
