@@ -4,9 +4,7 @@ process SOMALIER_EXTRACT {
     label 'process_low'
 
     conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/somalier:0.2.19--h0c29559_0':
-        'quay.io/biocontainers/somalier:0.2.19--h0c29559_0' }"
+    container 'https://depot.galaxyproject.org/singularity/somalier:0.3.2--h5205c93_0' // edited from original
 
     input:
     tuple val(meta), path(input), path(input_index)
