@@ -26,7 +26,7 @@ process CALL_VARIANTS_TRIO {
     mkdir tmp
     export TMPDIR=tmp
     export TF_GPU_ALLOCATOR=cuda_malloc_async
-    export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/local/lib/python3.10/dist-packages/tensorrt_libs
+    export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/local/lib/python3.10/dist-packages/tensorrt
 
     for value in $tfr_string
     do
