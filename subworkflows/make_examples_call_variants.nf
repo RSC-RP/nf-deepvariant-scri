@@ -41,7 +41,7 @@ workflow deeptrio {
         deepvar_model
         nshards
     main:
-        MAKE_EXAMPLES_TRIO(bam_ch, fasta, fai, test_bams, genome_ver, chromnames)
+        MAKE_EXAMPLES_TRIO(bam_ch, fasta, fai, test_bams, genome_ver, chromnames, deepvar_model)
         MAKE_EXAMPLES_TRIO.out.proband_tfrecord
             .map{ meta, me, gvcf -> [[proband_id: meta.proband_id], meta, me, gvcf] }
             .join(MAKE_EXAMPLES_TRIO.out.example_info)

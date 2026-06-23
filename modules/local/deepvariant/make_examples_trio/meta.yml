@@ -13,7 +13,7 @@ Tools:
         DeepVariant. DeepTrio extends DeepVariant's functionality, allowing it
         to utilize the power of neural networks to predict genomic variants in
         trios or duos.
-      homepage: https://github.com/google/deepvariant/blob/r1.8/docs/deeptrio-details.md
+      homepage: https://github.com/google/deepvariant/blob/r1.10/docs/deeptrio-details.md
       doi: 10.1101/2021.04.05.438434
       license: ["BSD 3-Clause"]
 input:
@@ -36,6 +36,18 @@ input:
   - fai_bams:
       type: path
       description: FAI index of reference genome.
+  - test_bams:
+      type: boolean
+      description: If true, a very small portion of the genome will be genotyped.
+  - genome_ver:
+      type: string
+      description: "hg19" or "hg38"
+  - chromnames:
+      type: string
+      description: "g1k", "ensembl", or "ucsc"
+  - deepvar_model
+      type: string
+      descrption: "WES" or "WGS"
 - output:
   - proband_tfrecord:
       type: tuple
